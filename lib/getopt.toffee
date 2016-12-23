@@ -1,3 +1,5 @@
+fs = require "fs"
+
 class ParsedOption
   constructor: (@argv, @options) ->
   empty: ->
@@ -120,7 +122,14 @@ class Getopt
       rt_options = {}
       rt_argv = []
       while (arg = argv.shift())?
-        if arg =~ /^-(\w[\w\-]*)/
+        if arg =~ /^@.+/
+          # response file
+          content = fs.readFileSync arg.substring(1), "utf8"
+          rsp_args = content.split "\n"
+          rsp_args = rsp_args.map (arg) ->
+            return arg.trim()
+          Array.prototype.unshift.apply argv, rsp_args
+        else if arg =~ /^-(\w[\w\-]*)/
           # short option
           short_names = \1
           for short_name, i in short_names
